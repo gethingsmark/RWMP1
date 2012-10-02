@@ -1,7 +1,7 @@
 
 var ctx;
 this._image;
-function Player(world, pos , vel , health ){
+function PlayerBullet(world, pos , vel , health ){
 	
 	// A list of enemies.
 	this._health = health;
@@ -13,7 +13,7 @@ function Player(world, pos , vel , health ){
 	this._velocity = vel;
 	
 	// Is alive.
-	this._alive = true;
+	this._alive = false;
 	
 	// The lives of the player.
 	this._lives = 3;
@@ -30,17 +30,20 @@ function Player(world, pos , vel , health ){
 	
 	this._body;
 	this._bodyType;
+	this._myBody;
 	
 	// Maybe more to come...
-	
+};
+
+PlayerBullet.prototype.bulletAlive = function(position){
 	this.bodyDef = new b2BodyDef;
 	this.bodyDef.type = b2Body.b2_dynamicBody;
-	this.bodyDef.position.Set(4,8);
+	this.bodyDef.position.Set(position.x+3,position.y);
 	this.bodyDef.userData = 'BOX';
 	this.bodyDef.linearDamping = 1;
 	this._myBody = world.CreateBody(this.bodyDef);
 	this.myFixture = new b2FixtureDef;
-	this.myFixture.shape = new b2CircleShape(2);
+	this.myFixture.shape = new b2CircleShape(.2);
 	this.myFixture.density = 10;
 	this.myFixture.friction = .5;
 	this.myFixture.restitution = .6; 
@@ -50,57 +53,63 @@ function Player(world, pos , vel , health ){
 	ctx=c.getContext("2d");
 	
 	ctx.drawImage(this._image, 10, 10);
+	this._alive = true;
+
 };
 
-Player.prototype.update = function(){
+PlayerBullet.prototype.update = function(){
+	if(this._alive == true)
+		this._myBody.SetLinearVelocity(new b2Vec2(5, 0));
 	
-	// Kill that mofo if the lives are gone.
-	if( this._lives == 0 ) this._alive = false;
-	ctx.drawImage(this._image, 10, 10);
-
+	if(this._alive == true)
+		if(this._myBody.GetPosition().x > 100)
+			this._alive = false;
 };
 
 
-Player.prototype.reset = function(){
+PlayerBullet.prototype.reset = function(){
 
 
 };
 
+PlayerBullet.prototype.isAlive = function( ){
+	return this._alive;
+}
 
-Player.prototype.getPosition = function( ){
-	this._position = this._myBody.GetPosition();
+PlayerBullet.prototype.getPosition = function( ){
+
 	return this._position;
 };
 
 
-Player.prototype.setPosition = function( x, y ){
+PlayerBullet.prototype.setPosition = function( x, y ){
 
 
 };
 
 
-Player.prototype.lostLife = function(  ){
+PlayerBullet.prototype.lostLife = function(  ){
 
 	// Set the colour of the player according to his lives.
 
 };
 
-Player.prototype.playerUp = function(force ){
+PlayerBullet.prototype.playerUp = function(force ){
 
 	this._myBody.SetLinearVelocity(new b2Vec2(0, -force));
 };
 
-Player.prototype.playerDown = function(force ){
+PlayerBullet.prototype.playerDown = function(force ){
 
 	this._myBody.SetLinearVelocity(new b2Vec2(0, force));
 };
 
-Player.prototype.playerLeft = function(force ){
+PlayerBullet.prototype.playerLeft = function(force ){
 	if(this._myBody.GetPosition().x>1)
 		this._myBody.SetLinearVelocity(new b2Vec2(-force, 0));
 };
 
-Player.prototype.playerRight = function(force ){
+PlayerBullet.prototype.playerRight = function(force ){
 	if(this._myBody.GetPosition().x<5)
 		this._myBody.SetLinearVelocity(new b2Vec2(force, 0));
 };

@@ -22,7 +22,6 @@ var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 var playerManager;
 var enemyManager = new EnemyManager();
 
-var myBody
 
 
 /**	@Name:	Init 
@@ -247,21 +246,20 @@ function handleKeyEvents( event ) {
 	switch( key ){
 
 		case 38:// UP ARROW
-		myBody.SetLinearVelocity(new b2Vec2(0, -3));	
+		playerManager.getPlayer(1).playerUp(2);	
 	
 	  		break;
 		case 40:// DOWN ARROW
-		myBody.SetLinearVelocity(new b2Vec2(0, 3));
+		playerManager.getPlayer(1).playerDown(2);
 	  		break;
 		case 37:// LEFT ARROW
-		if(myBody.GetPosition().x>1)
-			myBody.SetLinearVelocity(new b2Vec2(-3, 0));
+		playerManager.getPlayer(1).playerLeft(2);
 	  		break;
 		case 39:// RIGHT ARROW
-		if(myBody.GetPosition().x<5)
-			myBody.SetLinearVelocity(new b2Vec2(3, 0));
+		playerManager.getPlayer(1).playerRight(2);
 	  		break;
 		case 65:// A
+		playerManager.fireBullet();
 	  		break;
 		case 68:// D
 	  		break;
