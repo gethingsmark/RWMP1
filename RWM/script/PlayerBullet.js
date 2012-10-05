@@ -35,11 +35,11 @@ function PlayerBullet(world, pos , vel , health ){
 	// Maybe more to come...
 };
 
-PlayerBullet.prototype.bulletAlive = function(position){
+PlayerBullet.prototype.bulletAlive = function(position, arrayPos){
 	this.bodyDef = new b2BodyDef;
 	this.bodyDef.type = b2Body.b2_dynamicBody;
 	this.bodyDef.position.Set(position.x+3,position.y);
-	this.bodyDef.userData = 'BOX';
+	this.bodyDef.userData = 'Bullet' + arrayPos;
 	this.bodyDef.linearDamping = 1;
 	this._myBody = world.CreateBody(this.bodyDef);
 	this.myFixture = new b2FixtureDef;
@@ -74,6 +74,10 @@ PlayerBullet.prototype.reset = function(){
 
 PlayerBullet.prototype.isAlive = function( ){
 	return this._alive;
+}
+
+PlayerBullet.prototype.setAlive = function(change ){
+	this._alive = change;
 }
 
 PlayerBullet.prototype.getPosition = function( ){

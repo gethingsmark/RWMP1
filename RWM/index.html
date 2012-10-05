@@ -29,6 +29,14 @@
 				position: absolute;
 				left: 0;
 				top: 0;
+				z-index: 3;
+			}
+			
+			#canvasSprites{
+				background-color: transparent;
+				position: absolute;
+				left: 0;
+				top: 0;
 				z-index: 2;
 			}
 		</style>
@@ -38,9 +46,12 @@
 
 		<canvas id='canvasGame' height=200 width=200 ></canvas>
 		<canvas id='canvasGui' height=200 width=200 ></canvas>
+		<canvas id='canvasSprites' height=200 width=200 ></canvas>
 		<script type="text/javascript" src="./script/Box2dWeb-2.1.a.3.js"></script>
 		<script type="text/javascript" src="./script/EnemyManager.js"></script>
 		<script type="text/javascript" src="./script/Enemy.js"></script>
+		<script type="text/javascript" src="./script/EnemyMine.js"></script>
+		<script type="text/javascript" src="./script/EnemyTorpedo.js"></script>
 		<script type="text/javascript" src="./script/PlayerManager.js"></script>
 		<script type="text/javascript" src="./script/Player.js"></script>
 		<script type="text/javascript" src="./script/PlayerBullet.js"></script>

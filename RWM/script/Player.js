@@ -24,6 +24,8 @@ function Player(world, pos , vel , health ){
 	// The source of the image. This is an inital sprite and will be changed!
 	this._image.src = "img/tn_submarine.png";
 	
+	this._score = 0;
+	
 	//
 	//	Physical properties. Box2d stuff.
 	//
@@ -46,17 +48,23 @@ function Player(world, pos , vel , health ){
 	this.myFixture.restitution = .6; 
 	this._myBody.CreateFixture(this.myFixture);
 	
-	var c=document.getElementById("canvasGame");
+	var c=document.getElementById("canvasSprites");
 	ctx=c.getContext("2d");
+	c.width = window.innerWidth;
+	c.height = window.innerHeight;
 	
-	ctx.drawImage(this._image, 10, 10);
+	
+	//ctx.drawImage(this._image, 10, 10);
 };
 
-Player.prototype.update = function(){
+Player.prototype.update = function(Sposition){
 	
 	// Kill that mofo if the lives are gone.
-	if( this._lives == 0 ) this._alive = false;
-	ctx.drawImage(this._image, 10, 10);
+	//if( this._lives == 0 ) this._alive = false;
+	ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
+	ctx.drawImage(this._image, Sposition.x*30-50, Sposition.y*30-50);
+	
+	//this._myBody.SetLinearVelocity(new b2Vec2(0, -0.1));
 
 };
 
@@ -70,6 +78,18 @@ Player.prototype.reset = function(){
 Player.prototype.getPosition = function( ){
 	this._position = this._myBody.GetPosition();
 	return this._position;
+};
+
+Player.prototype.getBody = function( ){
+	return this._myBody;
+};
+
+Player.prototype.getScore = function( ){
+	return this._score;
+};
+
+Player.prototype.setScore = function( newScore ){
+	this._score = newScore;
 };
 
 
