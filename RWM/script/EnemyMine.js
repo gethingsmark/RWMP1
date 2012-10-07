@@ -17,6 +17,8 @@ var b2MassData = Box2D.Collision.Shapes.b2MassData;
 var b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
 var b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
 var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+var ctx;
+this._image;
 
 /**	@Name:	EnemyMine
 	@Brief:	This is the Constructor of the Class.
@@ -24,7 +26,7 @@ var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
 	@Arguments:N/A
 	@Returns: N/A
 */
-function EnemyMine( world, posX, posY, vel, health, width, height ){
+function EnemyMine( world, posX, posY, vel, health, width, height, arrayPos ){
 	this._health = health;												// The health variable of an Enemy Mine.	
 	this._positionX = posX;												// The current X Position of an Enemy Mine.
 	this._positionY = posY;												// The current X Position of an Enemy Mine.
@@ -33,15 +35,20 @@ function EnemyMine( world, posX, posY, vel, health, width, height ){
 	this._startPositionX = posX;										// The starting X Position of an Enemy Mine.
 	this._startPositionY = posY;										// The starting Y Position of an Enemy Mine.
 	this._velocity = vel;												// The velocity of an Enemy Mine.
-	this._alive = true;													// A boolean to check whether an Enemy Mine is alive or not.
+	this._alive = false;												// A boolean to check whether an Enemy Mine is alive or not.
 	this._ttl = 100;													// Time left until Enemy Mine dies.
 	this._world = world;												// The b2 world variable.
+	this._image = new Image();											// The graphical representation.
+	this._image.src = "img/mine.png";									// The source of the image.
+	this._imageWidth = 30;												// Width of the Sprite.
+	this._imageHeight = 30;												// Height of the Sprite.
 	this._body;															// Physical Body of an Enemy Mine.
 	this._bodyDef;														// The Body Definition of an Enemy Mine.
 	this._bodyFixtureDef;												// The Body Fixture Definition of an Enemy Mine.
 	this._bodyDef = new b2BodyDef;										// Create a new Body Definition for the Enemy Mine Object.
-	this._bodyDef.type = b2Body.b2_staticBody; 							// Define Object type.
+	this._bodyDef.type = b2Body.b2_dynamicBody; 						// Define Object type.
 	this._bodyDef.position.Set(this._positionX, this._positionY);		// Define Position.
+	this._bodyDef.userData = 'Mine' + arrayPos;							// Gives the Body a unique ID to check for collision callbacks.
 
 	this._bodyFixtureDef = new b2FixtureDef;							// Create a new Fixture Definition for an Enemy Mine Object.		
 	this._bodyFixtureDef.density = 10.0; 								// Define Density.
@@ -53,6 +60,13 @@ function EnemyMine( world, posX, posY, vel, health, width, height ){
 	
 	this._body = this._world.CreateBody(this._bodyDef);		// Create the Enemy Mine Body Object in the Game World.
 	this._body.CreateFixture(this._bodyFixtureDef);			// Create the defined Fixture for the Enemy Mine Body.
+	this._alive = true;
+	
+	var c=document.getElementById("canvasSprites");
+	ctx =c.getContext("2d");
+	c.width = window.innerWidth;
+	c.height = window.innerHeight;
+	
 };	// End Function EnemyMine().
 
 /**	@Name:	Update
@@ -63,12 +77,12 @@ function EnemyMine( world, posX, posY, vel, health, width, height ){
 	@Arguments:N/A
 	@Returns: N/A
 */
-EnemyMine.prototype.update = function(){
-		//Apply a force upwards through centre of the body
-		//this._body
-		//let it come come down back to a set position
-		//then re apply force
-
+EnemyMine.prototype.update = function(Sposition){
+	ctx.drawImage(this._image, Sposition.x*30 - this._imageWidth, Sposition.y*30 - this._imageHeight);
+		this._positionY = this.getPositionY();
+		if ( this._positionY >= this._startPositionY ) {
+			this._body.SetLinearVelocity(new b2Vec2(0, -2));
+		}
 };	// End Function update().
 
 /**	@Name:	Reset
@@ -85,6 +99,17 @@ EnemyMine.prototype.reset = function(){
 	this._positionY = this._body.GetDefinition().position.y;
 	this._positionY = this._startPositionY;
 };	// End Function reset().
+
+
+/**	@Name:	Get Position
+	@Brief:	This Function will return an Enemy Mine's Position.
+	@Arguments:N/A
+	@Returns: _position ( Position of the Enemy Mine )
+*/
+EnemyMine.prototype.getPosition = function( ){
+	this._position = this._body.GetPosition();
+	return this._position;
+};	// End Function getPosition().
 
 /**	@Name:	Get PositionX
 	@Brief:	This is the Get Function of the X Position of an Enemy Mine.

@@ -17,8 +17,8 @@ var b2MassData = Box2D.Collision.Shapes.b2MassData;
 var b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
 var b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
 var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
-this._image;
-var ctx;
+this._imageShark;
+var ctxShark;
 
 /**	@Name:	EnemyTorpedo
 	@Brief:	This is the Constructor of the Class.
@@ -26,7 +26,9 @@ var ctx;
 	@Arguments:N/A
 	@Returns: N/A
 */
-function EnemyTorpedo( world, posX, posY, vel, dir, health, width, height, arrayPos ){
+function EnemyShark( world, posX, posY, vel, dir, health, width, height, arrayPos ){
+
+	this._upDownCount = 0;
 
 	this._health = health;												// The health variable of an Enemy Torpedo.	
 	this._positionX = posX;												// The current X Position of an Enemy Torpedo.
@@ -39,26 +41,26 @@ function EnemyTorpedo( world, posX, posY, vel, dir, health, width, height, array
 	this._direction = dir;												// The direction of the Enemy Torpedo.
 	this._alive = false;												// A boolean to check whether an Enemy Torpedo is alive or not.
 	this._loaded = false;
-	this._image = new Image();											// The graphical representation.
-	this._image.addEventListener( "load", function() {
+	this._imageShark = new Image();											// The graphical representation.
+	this._imageShark.addEventListener( "load", function() {
 		this._loaded = true;
 	}, false );
-	this._image.src = "img/torpedo.png";								// The source of the image.
+	this._imageShark.src = "img/robotshark.png";								// The source of the image.
 	this._ttl = 100;													// Time left until Enemy Torpedo dies.
-	this._imageWidth = 50;												// Width of the Sprite.
-	this._imageHeight = 30;												// Height of the Sprite.
+	this._imageWidth = 107;												// Width of the Sprite.
+	this._imageHeight = 70;												// Height of the Sprite.
 	this._world = world;												// The b2 world variable.
 	this._body;															// Physical Body of an Enemy Torpedo.
 	this._bodyDef;														// The Body Definition of an Enemy Torpedo.
 	this._bodyFixtureDef;												// The Body Fixture Definition of an Enemy Torpedo.
 	this._bodyDef = new b2BodyDef;										// Create a new Body Definition for the Enemy Torpedo Object.
-	this._bodyDef.userData = 'Torpedo' + arrayPos;						// Gives the Body a unique ID to check for collision callbacks.
+	this._bodyDef.userData = 'Shark' + arrayPos;						// Gives the Body a unique ID to check for collision callbacks.
 	this._bodyDef.type = b2Body.b2_dynamicBody; 						// Define Object type.
 	this._bodyDef.position.Set( this._positionX, this._positionY );		// Define Position.
 
 	this._bodyFixtureDef = new b2FixtureDef;							// Create a new Fixture Definition for an Enemy Torpedo Object.		
 	this._bodyFixtureDef.density = 10.0; 								// Define Density.
-	this._bodyFixtureDef.friction = 0.4; 								// Define Friction.
+	this._bodyFixtureDef.friction = 0.1; 								// Define Friction.
 	this._bodyFixtureDef.restitution = 0.03; 							// Define Restitution.
 	this._bodyFixtureDef.shape = new b2PolygonShape; 					// Define Shape.
 	this._bodyFixtureDef.shape.SetAsBox(this._width, this._height); 	// Define Size.
@@ -84,7 +86,7 @@ function EnemyTorpedo( world, posX, posY, vel, dir, health, width, height, array
 	@Arguments:N/A
 	@Returns: N/A
 */
-EnemyTorpedo.prototype.remove = function( ){
+EnemyShark.prototype.remove = function( ){
 	
 };	// End Function remove().
 
@@ -95,7 +97,7 @@ EnemyTorpedo.prototype.remove = function( ){
 	@Arguments:N/A
 	@Returns: N/A
 */
-EnemyTorpedo.prototype.move = function(){
+EnemyShark.prototype.move = function(){
 
 	this._positionX = this._body.GetPosition.x;
 	this._positionX += this._velocity * this._direction;
@@ -110,7 +112,7 @@ EnemyTorpedo.prototype.move = function(){
 	@Arguments:N/A
 	@Returns: N/A
 */
-EnemyTorpedo.prototype.update = function( Sposition ){
+EnemyShark.prototype.update = function( Sposition ){
 
 	if ( this._alive ) {
 	
@@ -119,9 +121,19 @@ EnemyTorpedo.prototype.update = function( Sposition ){
 		//ctx.rotate(this._body.GetAngle());
 
 		// Draw the image in the place of the body, plus some fucked up numbers.
-		ctx.drawImage( this._image, this._body.GetPosition().x *30 - this._imageWidth, this._body.GetPosition().y *30 - this._imageHeight );
+		ctx.drawImage( this._imageShark, this._body.GetPosition().x *worldScale - this._imageWidth/2, this._body.GetPosition().y *worldScale - this._imageHeight/2 );
 		
-		this._body.SetLinearVelocity( new b2Vec2(-8, 0) );
+		//makes the shark move up and down as it swims forwards.
+		if(this._upDownCount < 10){
+			this._body.SetLinearVelocity( new b2Vec2(-6, 4) );
+			this._upDownCount = this._upDownCount+1;
+		}
+		else{
+			this._body.SetLinearVelocity( new b2Vec2(-6, -4) );
+			this._upDownCount = this._upDownCount+1;
+			if(this._upDownCount == 20)
+				this._upDownCount = 0;
+		}
 		
 		// undo Translate and rotate of the canvas
 		//ctx.rotate(-this._body.GetAngle());	
@@ -139,7 +151,7 @@ EnemyTorpedo.prototype.update = function( Sposition ){
 	@Arguments:N/A
 	@Returns: N/A
 */
-EnemyTorpedo.prototype.reset = function(){
+EnemyShark.prototype.reset = function(){
 	this._positionX = this._body.GetDefinition().position.x;
 	this._positionX = this._startPositionX;
 	this._positionY = this._body.GetDefinition().position.y;
@@ -151,7 +163,7 @@ EnemyTorpedo.prototype.reset = function(){
 	@Arguments:N/A
 	@Returns: _position ( Position of the Enemy Torpedo )
 */
-EnemyTorpedo.prototype.getPosition = function( ){
+EnemyShark.prototype.getPosition = function( ){
 	this._position = this._body.GetPosition();
 	return this._position;
 };	// End Function getPosition().
@@ -163,7 +175,7 @@ EnemyTorpedo.prototype.getPosition = function( ){
 	@Arguments:N/A
 	@Returns: _position ( Returns the position of the Enemy Mine )
 */
-EnemyTorpedo.prototype.getPositionX = function( ){
+EnemyShark.prototype.getPositionX = function( ){
 	this._positionX = this._body.GetDefinition().position.x;
 	return this._positionX;
 };	// End Function getPositionX().
@@ -175,7 +187,7 @@ EnemyTorpedo.prototype.getPositionX = function( ){
 	@Arguments:N/A
 	@Returns: _position ( Returns the position of the Enemy Mine )
 */
-EnemyTorpedo.prototype.getPositionY = function( ){
+EnemyShark.prototype.getPositionY = function( ){
 	this._positionY = this._body.GetDefinition().position.y;
 	return this._positionY;
 };	// End Function getPositionY().
@@ -187,18 +199,17 @@ EnemyTorpedo.prototype.getPositionY = function( ){
 	@Arguments: newPosX, newPosY.
 	@Returns: N/A
 */
-EnemyTorpedo.prototype.setPosition = function( newPosX, newPosY ){
+EnemyShark.prototype.setPosition = function( newPosX, newPosY ){
 	this._positionX = this._body.GetDefinition().position.x;
 	this._positionY = this._body.GetDefinition().position.y;
 	this._positionX = newPosX;
 	this._positionY = newPosY;
 };	//End Function setPosition( newPosX, newPosY ).
 
-EnemyTorpedo.prototype.isAlive = function( ){
+EnemyShark.prototype.isAlive = function( ){
 	return this._alive;
 }
 
-EnemyTorpedo.prototype.setAlive = function(change ){
+EnemyShark.prototype.setAlive = function(change ){
 	this._alive = change;
 }
-

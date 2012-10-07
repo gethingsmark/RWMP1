@@ -36,6 +36,7 @@ function PlayerBullet(world, pos , vel , health ){
 };
 
 PlayerBullet.prototype.bulletAlive = function(position, arrayPos){
+	//create the bullet in box2d
 	this.bodyDef = new b2BodyDef;
 	this.bodyDef.type = b2Body.b2_dynamicBody;
 	this.bodyDef.position.Set(position.x+3,position.y);
@@ -49,20 +50,21 @@ PlayerBullet.prototype.bulletAlive = function(position, arrayPos){
 	this.myFixture.restitution = .6; 
 	this._myBody.CreateFixture(this.myFixture);
 	
-	var c=document.getElementById("canvasGame");
-	ctx=c.getContext("2d");
-	
-	ctx.drawImage(this._image, 10, 10);
 	this._alive = true;
 
 };
 
 PlayerBullet.prototype.update = function(){
-	if(this._alive == true)
-		this._myBody.SetLinearVelocity(new b2Vec2(5, 0));
+	//move the bullet if it is alive
+	if(this._alive == true){
+		this._myBody.SetLinearVelocity(new b2Vec2(this._velocity, 0));
+		//spriteCtx.clearRect(0,0,window.innerWidth,window.innerHeight);
+		//spriteCtx.drawImage(this._image, this._myBody.GetPosition.x*30, this._myBody.GetPosition.y*30);
+	}
 	
+	//destroy the bullet when it goes off of the screen.
 	if(this._alive == true)
-		if(this._myBody.GetPosition().x > 100)
+		if(this._myBody.GetPosition().x > window.innerWidth/30)
 			this._alive = false;
 };
 

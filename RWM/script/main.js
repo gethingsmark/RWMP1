@@ -21,6 +21,7 @@ var b2MassData = Box2D.Collision.Shapes.b2MassData;
 var b2PolygonShape = Box2D.Collision.Shapes.b2PolygonShape;
 var b2CircleShape = Box2D.Collision.Shapes.b2CircleShape;
 var b2DebugDraw = Box2D.Dynamics.b2DebugDraw;
+var b2Listener = Box2D.Dynamics.b2ContactListener;
 
 var playerManager;
 var enemyManager;
@@ -29,6 +30,10 @@ var enemyMine;
 var enemyTorpedo;
 
 var keyPressed = false;
+
+var worldScale;
+//Add listeners for contact
+var listener = new b2Listener;
 
 
 /**	@Name:	Init 
@@ -50,7 +55,8 @@ function init(){
 		
 	*/
 	world = new b2World( new b2Vec2( 0, 10 ), true);
-	
+	world.SetContactListener(listener);
+	worldScale = 30;
 	playerManager = new PlayerManager(world);
 	
 	//world, posX, posY, vel, health, width, height
@@ -121,6 +127,7 @@ function main(){
 	playerManager.update();
 	// Update the enemies.
 	enemyManager.update();
+	enemyMine.update(this.enemyMine.getPosition());
 
 	if(!keyPressed)
 		playerManager.getPlayer(0).getBody().SetLinearVelocity(new b2Vec2(0, -0.05));
@@ -195,7 +202,7 @@ function drawGui(){
 	//guiCtx.fillText( 'Width : '+ window.innerWidth, 10, 210 );
 	guiCtx.font="20px Georgia";
 	guiCtx.fillText( 'Score : '+ playerManager.getPlayer().getScore(), 10, 25 );
-	guiCtx.fillText( 'Health : '+ window.innerHeight, 500, 25 );
+	guiCtx.fillText( 'Health : '+ playerManager.getPlayer().getHealth(), 500, 25 );
 
 };
 
@@ -262,15 +269,93 @@ function drawStuff( ) {
 
 	var debugDraw = new b2DebugDraw();
 	debugDraw.SetSprite ( document.getElementById ("canvasGame").getContext ("2d"));
-	debugDraw.SetDrawScale(30);
+	debugDraw.SetDrawScale(worldScale);
 	debugDraw.SetFillAlpha(0.3); //define transparency
 	debugDraw.SetLineThickness(1.0); //defines thickness of lines or boundaries
 	debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit);
 	world.SetDebugDraw(debugDraw);
-	debugDraw.SetDrawScale(30);
 	debugDraw.SetFlags(b2DebugDraw.e_shapeBit | b2DebugDraw.e_jointBit | b2DebugDraw.e_aabbBit| b2DebugDraw.e_pairBit| b2DebugDraw.e_centerOfMassBit);
 
 };
+
+listener.BeginContact = function(contact) {
+    //console.log(contact.GetFixtureA().GetBody().GetUserData());
+}
+
+listener.EndContact = function(contact) {
+    // console.log(contact.GetFixtureA().GetBody().GetUserData());
+}
+
+listener.PostSolve = function(contact, impulse) {
+	var i = 0;
+	while (i < 5){
+		if (contact.GetFixtureA().GetBody().GetUserData() == 'Bullet' + i || contact.GetFixtureB().GetBody().GetUserData() == 'Bullet' + i) {
+			//var impulse = impulse.normalImpulses[0];
+			//if (impulse < 0.2) return; //threshold ignore small impacts
+			//world.ball.impulse = impulse > 0.6 ? 0.5 : impulse;
+			//console.log(world.ball.impulse);
+			playerManager.getPlayer().setScore(playerManager.getPlayer().getScore() + 1);
+		}
+		if (contact.GetFixtureA().GetBody().GetUserData() == 'Bullet' + i){
+		//destry body here...
+		world.DestroyBody(contact.GetFixtureA().GetBody());
+		//contact.GetFixtureA().GetBody() = null;
+		playerManager.getPlayerBullets()[i].setAlive(false);
+		}
+		else if (contact.GetFixtureB().GetBody().GetUserData() == 'Bullet' + i){
+		//destry body here...
+		//contact.GetFixtureB().GetBody().DestroyFixture();
+		world.DestroyBody(contact.GetFixtureB().GetBody());
+		//contact.GetFixtureA().GetBody() = null;
+		playerManager.getPlayerBullets()[i].setAlive(false);
+		}
+		i++;
+	}
+	//if we are in the first wave check for collisions with enemy 1 here
+	if (enemyManager.checkWave()== 1){
+	var j = 0;
+	while(j<enemyManager.getWaveCount(1)){
+		if (contact.GetFixtureA().GetBody().GetUserData() == 'Torpedo' + j){
+		//destry body here...
+		world.DestroyBody(contact.GetFixtureA().GetBody());
+		//contact.GetFixtureA().GetBody() = null;
+		enemyManager.getWave(1)[j].setAlive(false);
+		}
+		else if (contact.GetFixtureB().GetBody().GetUserData() == 'Torpedo' + j){
+		//destry body here...
+		//contact.GetFixtureB().GetBody().DestroyFixture();
+		world.DestroyBody(contact.GetFixtureB().GetBody());
+		//contact.GetFixtureA().GetBody() = null;
+		enemyManager.getWave(1)[j].setAlive(false);
+		}
+		j++;
+	}
+	}
+	else if (enemyManager.checkWave()== 2){
+	var s = 0;
+	while(s<enemyManager.getWaveCount(2)){
+		if (contact.GetFixtureA().GetBody().GetUserData() == 'Shark' + s){
+		//destry body here...
+		world.DestroyBody(contact.GetFixtureA().GetBody());
+		//contact.GetFixtureA().GetBody() = null;
+		enemyManager.getWave(2)[s].setAlive(false);
+		}
+		else if (contact.GetFixtureB().GetBody().GetUserData() == 'Shark' + s){
+		//destry body here...
+		//contact.GetFixtureB().GetBody().DestroyFixture();
+		world.DestroyBody(contact.GetFixtureB().GetBody());
+		//contact.GetFixtureA().GetBody() = null;
+		enemyManager.getWave(2)[s].setAlive(false);
+		}
+		s++;
+	}
+	}
+}
+
+listener.PreSolve = function(contact, oldManifold) {
+    // PreSolve
+}
+
 
 
 
@@ -286,42 +371,44 @@ function handleKeyEvents( event ) {
 
 	switch( key ){
 
+		case 32:// Space, shoot
+		playerManager.fireBullet();
+			break;
 		case 38:// UP ARROW
-		playerManager.getPlayer(1).playerUp(2);	
-		keyPressed = true;
+			playerManager.getPlayer(1).playerUp(5);	
+			keyPressed = true;
 	  		break;
 		case 40:// DOWN ARROW
-		playerManager.getPlayer(1).playerDown(2);
-		keyPressed = true;
+			playerManager.getPlayer(1).playerDown(5);
+			keyPressed = true;
 	  		break;
 		case 37:// LEFT ARROW
-		playerManager.getPlayer(1).playerLeft(2);
-		keyPressed = true;
+			playerManager.getPlayer(1).playerLeft(5);
+			keyPressed = true;
 	  		break;
 		case 39:// RIGHT ARROW
-		playerManager.getPlayer(1).playerRight(2);
-		keyPressed = true;
+			playerManager.getPlayer(1).playerRight(5);
+			keyPressed = true;
 	  		break;
 		case 65:// A
-		playerManager.getPlayer(1).playerLeft(2);
-		keyPressed = true;
+			playerManager.getPlayer(1).playerLeft(5);
+			keyPressed = true;
 	  		break;
 		case 68:// D
-		playerManager.getPlayer(1).playerRight(2);
-		keyPressed = true;
+			playerManager.getPlayer(1).playerRight(5);
+			keyPressed = true;
 	  		break;
 		case 87:// W
-		playerManager.getPlayer(1).playerUp(2);	
-		keyPressed = true;
+			playerManager.getPlayer(1).playerUp(5);	
+			keyPressed = true;
 	  		break;
 		case 83:// S
-		playerManager.getPlayer(1).playerDown(2);
-		keyPressed = true;
+			playerManager.getPlayer(1).playerDown(5);
+			keyPressed = true;
 	  		break;
 		case 88:
 	  		break;
 		case 97:// Num pad 1. First Person.
-		playerManager.fireBullet();
 	  		break;
 		case 98:// Num pad 2. Test.
 	  		break;

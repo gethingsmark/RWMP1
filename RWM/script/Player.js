@@ -1,5 +1,5 @@
 
-var ctx;
+var spriteCtx;
 this._image;
 function Player(world, pos , vel , health ){
 	
@@ -35,6 +35,7 @@ function Player(world, pos , vel , health ){
 	
 	// Maybe more to come...
 	
+	//create the box2d physics for player here.
 	this.bodyDef = new b2BodyDef;
 	this.bodyDef.type = b2Body.b2_dynamicBody;
 	this.bodyDef.position.Set(4,8);
@@ -42,14 +43,15 @@ function Player(world, pos , vel , health ){
 	this.bodyDef.linearDamping = 1;
 	this._myBody = world.CreateBody(this.bodyDef);
 	this.myFixture = new b2FixtureDef;
-	this.myFixture.shape = new b2CircleShape(2);
+	this.myFixture.shape = new b2CircleShape(1);
 	this.myFixture.density = 10;
 	this.myFixture.friction = .5;
 	this.myFixture.restitution = .6; 
 	this._myBody.CreateFixture(this.myFixture);
 	
+	//set up the sprite canvas to draw sprites over the physics world
 	var c=document.getElementById("canvasSprites");
-	ctx=c.getContext("2d");
+	spriteCtx=c.getContext("2d");
 	c.width = window.innerWidth;
 	c.height = window.innerHeight;
 	
@@ -61,8 +63,10 @@ Player.prototype.update = function(Sposition){
 	
 	// Kill that mofo if the lives are gone.
 	//if( this._lives == 0 ) this._alive = false;
-	ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
-	ctx.drawImage(this._image, Sposition.x*30-50, Sposition.y*30-50);
+	
+	//refresh the player sprite on the screen.
+	spriteCtx.clearRect(0,0,window.innerWidth,window.innerHeight);
+	spriteCtx.drawImage(this._image, Sposition.x*worldScale-50, Sposition.y*worldScale-50);
 	
 	//this._myBody.SetLinearVelocity(new b2Vec2(0, -0.1));
 
@@ -92,6 +96,14 @@ Player.prototype.setScore = function( newScore ){
 	this._score = newScore;
 };
 
+Player.prototype.getHealth = function( ){
+	return this._health;
+};
+
+Player.prototype.setHealth = function( newScore ){
+	this._health = newScore;
+};
+
 
 Player.prototype.setPosition = function( x, y ){
 
@@ -105,14 +117,16 @@ Player.prototype.lostLife = function(  ){
 
 };
 
-Player.prototype.playerUp = function(force ){
+//Player movement ->:
 
-	this._myBody.SetLinearVelocity(new b2Vec2(0, -force));
+Player.prototype.playerUp = function(force ){
+	if(this._myBody.GetPosition().y > 0)
+		this._myBody.SetLinearVelocity(new b2Vec2(0, -force));
 };
 
 Player.prototype.playerDown = function(force ){
-
-	this._myBody.SetLinearVelocity(new b2Vec2(0, force));
+	if(this._myBody.GetPosition().y < window.innerHeight/30)
+		this._myBody.SetLinearVelocity(new b2Vec2(0, force));
 };
 
 Player.prototype.playerLeft = function(force ){

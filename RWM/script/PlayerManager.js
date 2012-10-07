@@ -1,36 +1,30 @@
 
-this._bulletCount;
-var b2Listener = Box2D.Dynamics.b2ContactListener;
-
-//Add listeners for contact
-var listener = new b2Listener;
-var player;
-var collWorld;
-var playerBullets;
 
 function PlayerManager(world){
 	
-	// A list of enemies.
-	this._player = new Player(world, "pos", "vel", "health" );
-	player = this._player;
+	// Create the player
+	this._playerHealth = 100;
+	this._player = new Player(world, "pos", "vel", this._playerHealth );
+	//player = this._player;
 	
+	//create the players bullets
 	this._bulletCount = 5;
+	this.BulletVel = 5;
 	this._playerBullets = new Array(this._bulletCount);
-	this._playerBullets[0] = new PlayerBullet(world, "pos", "vel", "health" );
-	this._playerBullets[1] = new PlayerBullet(world, "pos", "vel", "health" );
-	this._playerBullets[2] = new PlayerBullet(world, "pos", "vel", "health" );
-	this._playerBullets[3] = new PlayerBullet(world, "pos", "vel", "health" );
-	this._playerBullets[4] = new PlayerBullet(world, "pos", "vel", "health" );
+	this._playerBullets[0] = new PlayerBullet(world, "pos", this.BulletVel, "health" );
+	this._playerBullets[1] = new PlayerBullet(world, "pos", this.BulletVel, "health" );
+	this._playerBullets[2] = new PlayerBullet(world, "pos", this.BulletVel, "health" );
+	this._playerBullets[3] = new PlayerBullet(world, "pos", this.BulletVel, "health" );
+	this._playerBullets[4] = new PlayerBullet(world, "pos", this.BulletVel, "health" );
 	
 	this._world = world;
-	this._world.SetContactListener(listener);
-	collWorld = this._world;
 	
-	playerBullets = this._playerBullets;
+	//playerBullets = this._playerBullets;
 };
 
 PlayerManager.prototype.update = function(){
 
+	//update the player and the players bullets
 	this._player.update(this._player.getPosition());
 	var i =0;
 	while (i < this._bulletCount){
@@ -42,6 +36,7 @@ PlayerManager.prototype.update = function(){
 };
 
 PlayerManager.prototype.fireBullet = function(){
+	//Fire the player bullets, one at a time.
 	var i =0;
 	while (i < this._bulletCount){
 		if(!this._playerBullets[i].isAlive()){
@@ -58,40 +53,7 @@ PlayerManager.prototype.getPlayer = function( index ){
 
 };
 
-listener.BeginContact = function(contact) {
-    //console.log(contact.GetFixtureA().GetBody().GetUserData());
-}
+PlayerManager.prototype.getPlayerBullets = function(){
+	return this._playerBullets;
 
-listener.EndContact = function(contact) {
-    // console.log(contact.GetFixtureA().GetBody().GetUserData());
-}
-
-listener.PostSolve = function(contact, impulse) {
-	var i = 0;
-	while (i < 5){
-		if (contact.GetFixtureA().GetBody().GetUserData() == 'Bullet' + i || contact.GetFixtureB().GetBody().GetUserData() == 'Bullet' + i) {
-			//var impulse = impulse.normalImpulses[0];
-			//if (impulse < 0.2) return; //threshold ignore small impacts
-			//world.ball.impulse = impulse > 0.6 ? 0.5 : impulse;
-			//console.log(world.ball.impulse);
-			player.setScore(player.getScore() + 1);
-		}
-		if (contact.GetFixtureA().GetBody().GetUserData() == 'Bullet' + i){
-		//destry body here...
-		collWorld.DestroyBody(contact.GetFixtureA().GetBody());
-		//contact.GetFixtureA().GetBody() = null;
-		playerBullets[i].setAlive(false);
-		}
-		else if (contact.GetFixtureB().GetBody().GetUserData() == 'Bullet' + i){
-		//destry body here...
-		collWorld.DestroyBody(contact.GetFixtureB().GetBody());
-		//contact.GetFixtureA().GetBody() = null;
-		playerBullets[i].setAlive(false);
-		}
-		i++;
-	}
-}
-
-listener.PreSolve = function(contact, oldManifold) {
-    // PreSolve
-}
+};
