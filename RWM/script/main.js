@@ -287,6 +287,14 @@ listener.EndContact = function(contact) {
 }
 
 listener.PostSolve = function(contact, impulse) {
+
+	if (contact.GetFixtureA().GetBody().GetUserData() == 'Player' || contact.GetFixtureB().GetBody().GetUserData() == 'Player') {
+			//var impulse = impulse.normalImpulses[0];
+			//if (impulse < 0.2) return; //threshold ignore small impacts
+			//world.ball.impulse = impulse > 0.6 ? 0.5 : impulse;
+			//console.log(world.ball.impulse);
+			playerManager.getPlayer().setHealth(playerManager.getPlayer().getHealth() - 1);
+		}
 	var i = 0;
 	while (i < 5){
 		if (contact.GetFixtureA().GetBody().GetUserData() == 'Bullet' + i || contact.GetFixtureB().GetBody().GetUserData() == 'Bullet' + i) {

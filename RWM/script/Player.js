@@ -39,7 +39,7 @@ function Player(world, pos , vel , health ){
 	this.bodyDef = new b2BodyDef;
 	this.bodyDef.type = b2Body.b2_dynamicBody;
 	this.bodyDef.position.Set(4,8);
-	this.bodyDef.userData = 'BOX';
+	this.bodyDef.userData = 'Player';
 	this.bodyDef.linearDamping = 1;
 	this._myBody = world.CreateBody(this.bodyDef);
 	this.myFixture = new b2FixtureDef;
